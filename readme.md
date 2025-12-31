@@ -125,7 +125,7 @@ python Main.py --data {dataset}
 **Performance comparison in terms of *Recall* and *NDCG***:
 
 ### Cold-Start Setting
-
+```latex
 \begin{table*}[htbp]
   \centering
   \caption{Performance comparison across different backbones and methods on three datasets with cold-start user settings. Boldface indicates the highest score, while underlining denotes the second-best result among the models.}
@@ -168,7 +168,7 @@ python Main.py --data {dataset}
 \end{table*}
 
 ### Long-Tail Setting
-
+```latex
 \begin{table*}[!t]
 \centering
 \caption{Performance comparison across different methods on three datasets with long-tail settings.}
