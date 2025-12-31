@@ -1,228 +1,165 @@
+# From ID to LLM: Rethinking Representation Learning for Recommendation
 
+This repository contains the **codebase and datasets** for the paper:
 
-# 🧠  LLM Representation Is All You Need for Recommendation
-
-> **Official PyTorch Implementation**
-
----
-
-## 🌐 Overview
-
-Recent advances in **Large Language Models (LLMs)** have demonstrated strong semantic reasoning and generalization ability.
-However, in recommender systems, **LLM representations consistently underperform traditional ID embeddings**, especially on collaborative filtering tasks—leading to a widely held belief that *LLMs cannot replace ID-based representations*.
-
-In this work, we revisit this assumption from an **information-theoretic perspective** and show that:
-
-> 🔍 **LLM representations are theoretically sufficient to subsume all collaborative signals encoded in ID embeddings.**
-
-We further demonstrate that the empirical underperformance of LLM embeddings stems not from information loss, but from **semantic entanglement and misalignment with recommendation objectives**.
-
-To bridge this gap, we propose **Profile-then-Embedding (PtE)** — a principled, two-stage recommendation framework that decouples **semantic reasoning** from **embedding learning**.
+> **From ID to LLM: Rethinking Representation Learning for Recommendation**
 
 ---
 
-<div align="center">
-  <img src="img/pipeline.png" alt="PtE Framework" width="85%">
-</div>
+## 📌 Introduction
+
+Recent studies suggest a fundamental incompatibility between **ID-based representations** and **language model (LM) representations** in recommender systems.  
+ID representations primarily encode **collaborative behavioral signals**, whereas LM representations capture **semantic information**.  
+As a result, LM-based representations often underperform traditional ID embeddings in recommendation tasks.
+
+In this work, we revisit this problem from an **information-theoretic perspective** and show that **LLM representations theoretically subsume all discriminative information contained in ID embeddings**.  
+Based on this observation, we propose **Profile-then-Embedding (PtE)**, a two-stage framework for recommendation:
+
+- **Profile Stage**:  
+  Semantic user and item profiles are jointly generated through **LLM-based bidirectional reasoning** over user–item interaction histories.
+
+- **Personalized Embedding Stage**:  
+  The generated profiles are encoded into **task-aligned recommendation embeddings**, optimized for downstream recommendation objectives.
+
+Extensive experiments on multiple benchmark datasets demonstrate that PtE consistently improves performance under **cold-start** and **long-tail** settings, across both **discriminative** and **generative** recommendation models.
+
+<img src="./img/motivation.png" width="100%" />
 
 ---
 
-## 🔑 Key Idea
+## 📝 Environment
 
-PtE reframes LLM-based recommendation as a **generate-then-embed** process:
+### Base Recommendation Models
 
-### 🧩 1. Profile Stage — Semantic Reasoning over Interactions
+- `python==3.9.13`
+- `numpy==1.23.1`
+- `torch==1.11.0`
+- `scipy==1.9.1`
 
-* 🧠 **Bidirectional LLM Reasoning** jointly generates **user and item semantic profiles**
-* 🔁 User profiles are inferred from interaction histories and collaborative neighbors
-* 🔁 Item profiles are induced from the semantic characteristics of their interacting users
-* ♻️ Profiles are iteratively refined in a **closed-loop**, enabling mutual semantic enhancement
+### LLM Fine-tuning and Alignment
 
-### 🎯 2. Personalized Embedding Stage — Task-Aligned Representation Learning
-
-* 🧬 Multiple candidate profiles are sampled per user/item
-* ⚖️ **Group Relative Policy Optimization (GRPO)** selects profiles that:
-
-  * Align with collaborative signals
-  * Preserve personalization and distinctiveness
-* 📐 Final embeddings are extracted from optimized profiles for downstream recommendation
-
-> ✨ By explicitly surfacing collaborative signals *before* embedding, PtE reconciles the theoretical sufficiency of LLMs with practical recommendation performance.
+- `wandb==0.16.2`
+- `transformers==4.36.2`
+- `trl==0.7.9`
+- `peft==0.7.2`
 
 ---
 
-## 🧠 Theoretical Foundations
+## 🚀 How to Run
 
-PtE is grounded in **statistical decision theory**.
-
-We show that:
-
-* **LLM embeddings Blackwell-dominate ID embeddings**
-* Any fusion of ID + LLM embeddings cannot contain more predictive information than LLM embeddings alone
-* Empirical fusion gains arise from *optimization convenience*, not information superiority
-
-<div align="center">
-  <img src="img/case.png" alt="Information Dominance Case Study" width="70%">
-</div>
-
-📌 **Takeaway**
-
-> *The problem is not whether LLM embeddings are sufficient — but how to disentangle and exploit the collaborative signals they already contain.*
-
----
-
-## ⚙️ Requirements
-
-### Dependencies
+### 1. LLM Fine-tuning with LoRA
 
 ```bash
-Python >= 3.8
-PyTorch >= 1.13
-transformers
-einops
-numpy
-scikit-learn
-```
+cd ./llm/lora/
+````
 
-### Optional
+#### (a) Supervised Fine-tuning via Knowledge Distillation (User Side)
 
 ```bash
-accelerate
-deepspeed
+python sft_base.py
 ```
 
----
-
-## 📦 Datasets
-
-We evaluate PtE on widely used **Amazon recommendation benchmarks**:
-
-| Dataset | Domain            |
-| ------- | ----------------- |
-| Movies  | Movies & TV       |
-| Toys    | Toys & Games      |
-| Sports  | Sports & Outdoors |
-| Yelp    | Local Business    |
-
-### Settings
-
-* **Cold-start user evaluation**
-* **Leave-one-out evaluation**
-* **Long-tail user & item splits**
-
-Dataset preprocessing follows prior work (LLM-ESR, DreamRec).
-
----
-
-## 🚀 Training & Evaluation
-
-### 🔹 Profile Generation
+#### (b) Collaborative Instruction Tuning (User Side)
 
 ```bash
-python profile/generate_user_profiles.py
-python profile/generate_item_profiles.py
+python sft_base_mask.py
 ```
 
-Supports:
-
-* Prompt perturbation
-* Temperature sampling
-* Iterative bidirectional refinement
-
----
-
-### 🔹 Embedding Optimization (GRPO)
+#### (c) Reinforcement Learning for Personalized Feature Enhancement (User Side)
 
 ```bash
-python train/grpo_embedding.py --dataset Movies --backbone SASRec
+cd ./rlhf/
 ```
 
-Backbones:
 
-* **SASRec** (discriminative)
-* **DreamRec** (generative diffusion-based)
 
----
-
-### 🔹 Evaluation
+* GRPO Optimization :
 
 ```bash
-python eval/evaluate.py --setting cold_start
-python eval/evaluate.py --setting leave_one_out
+python rl_training.py
 ```
 
-Metrics:
+#### (d) Collaborative Instruction Tuning (Item Side)
 
-* NDCG@K
-* Recall@K
-* Hit@K
-
----
-
-## 🧪 Experimental Results
-
-### 🧊 Cold-Start Performance
-
-* PtE consistently outperforms:
-
-  * LLMInit
-  * RLMRec
-  * AlphaFuse
-  * LLM-ESR
-* Gains are most pronounced under **severe sparsity**
-
-### 🌱 Long-Tail Robustness
-
-* Up to **49% relative improvement** on tail users/items
-* Stable across both discriminative and generative backbones
-
-> 📈 PtE remains effective where direct LLM embedding and fusion-based methods collapse.
-
----
-
-## 🔍 Ablation Highlights
-
-| Variant                 | Observation            |
-| ----------------------- | ---------------------- |
-| No Profile              | Severe degradation     |
-| User-only / Item-only   | Partial gains          |
-| Single-pass profiling   | Unstable semantics     |
-| No GRPO                 | Profile collapse       |
-| No collaborative reward | Tail performance drops |
-
-➡️ **Joint profiling + relative optimization is critical**
-
----
-
-## 📌 Contributions Summary
-
-* 🧠 **Theory**: Establishes information dominance of LLM embeddings over ID embeddings
-* 🔄 **Method**: Introduces Profile-then-Embedding to disentangle semantic and collaborative signals
-* ❄️ **Robustness**: Strong cold-start and long-tail generalization
-* 🔌 **Generality**: Works across discriminative and generative recommenders
-
----
-
-## 📖 Citation
-
-If you find this work useful, please cite:
-
-```bibtex
-@article{pte2025,
-  title={LLM Representation Is All You Need for Recommendation},
-  author={Anonymous},
-  journal={ACL},
-  year={2025}
-}
+```bash
+python sft_base_item.py
 ```
 
 ---
 
-## ⚠️ Limitations & Future Work
+### 2. User / Item Profile Generation
 
-* Profile generation incurs non-trivial LLM cost
-* Future work:
+* **User profile generation (knowledge distillation only)**:
 
-  * Profile distillation
-  * Lightweight domain-specific LLMs
-  * Formal analysis of semantic disentanglement dynamics
+```bash
+python inference_base.py
+```
+
+* **User profile generation (instruction tuning + RL enhancement)**:
+
+```bash
+python inference_base_mask.py
+```
+
+* **Item profile generation**:
+
+```bash
+python inference_base_item.py
+```
+
+---
+
+### 3. Running Recommendation Models with Generated Profiles
+
+Example: running **BiasMF** with generated user/item profiles:
+
+```bash
+cd ./base_models/BiasMF/
+python Main.py --data {dataset}
+```
+
+---
+
+## 🎯 Experimental Results
+
+**Performance comparison in terms of *Recall* and *NDCG***:
+
+### Cold-Start Setting
+
+<img src="./img/cold_start.png" width="100%" />
+
+### Long-Tail Setting
+
+<img src="./img/long_tail.png" width="100%" />
+
+---
+
+## 📚 Datasets
+
+### Dataset Statistics
+
+| Statistics       | MIND    | Netflix   | Industrial |
+| ---------------- | ------- | --------- | ---------- |
+| # Users          | 57,128  | 16,835    | 117,433    |
+| # Overlap Items  | 1,020   | 6,232     | 72,417     |
+| # Snapshot       | Daily   | Yearly    | Daily      |
+| **Training Set** |         |           |            |
+| # Items          | 2,386   | 6,532     | 152,069    |
+| # Interactions   | 89,734  | 1,655,395 | 858,087    |
+| # Sparsity       | 99.934% | 98.495%   | 99.995%    |
+| **Test Set**     |         |           |            |
+| # Items          | 2,461   | 8,413     | 158,155    |
+| # Interactions   | 87,974  | 1,307,051 | 876,415    |
+| # Sparsity       | 99.937% | 99.077%   | 99.995%    |
+
+---
+
+## 📎 Notes
+
+* This repository focuses on **representation learning**, rather than prompt-based generation.
+* Profile generation and embedding learning are **decoupled by design**, enabling stable integration with both discriminative and generative recommenders.
+* Code is organized to facilitate reproducibility and extension.
+
+```
+
+
