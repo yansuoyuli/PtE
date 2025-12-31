@@ -166,7 +166,7 @@ python Main.py --data {dataset}
     \end{tabular}
   }
 \end{table*}
-
+```
 ### Long-Tail Setting
 ```latex
 \begin{table*}[!t]
@@ -317,7 +317,7 @@ python Main.py --data {dataset}
 \end{tabular}
 }
 \end{table*}
-
+```
 ---
 
 ## 📚 Datasets
