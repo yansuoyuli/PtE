@@ -51,27 +51,23 @@ Extensive experiments on multiple benchmark datasets demonstrate that PtE consis
 
 ```bash
 cd ./llm/lora/
-````
-
-#### (a) Supervised Fine-tuning via Knowledge Distillation (User Side)
-
-```bash
-python sft_base.py
 ```
 
-#### (b) Collaborative Instruction Tuning (User Side)
+#### (a) Supervised Fine-tuning Loop Procedure Repeat until convergence:
+We adopt an iterative collaborative fine-tuning strategy. 
+Starting from a base LLM, we alternately perform user-side and item-side LoRA-based instruction tuning. 
+At each iteration, the model is initialized with the LoRA parameters obtained from the previous stage. This process is repeated until convergence.
 
 ```bash
-python sft_base_mask.py
+python loop_lora_train.py
 ```
 
-#### (c) Reinforcement Learning for Personalized Feature Enhancement (User Side)
+
+#### (c) Reinforcement Learning for Personalized Feature Enhancement
 
 ```bash
 cd ./rlhf/
 ```
-
-
 
 * GRPO Optimization :
 
@@ -79,11 +75,7 @@ cd ./rlhf/
 python rl_training.py
 ```
 
-#### (d) Collaborative Instruction Tuning (Item Side)
 
-```bash
-python sft_base_item.py
-```
 
 ---
 
