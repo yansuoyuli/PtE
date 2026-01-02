@@ -120,6 +120,7 @@ python Main.py --data {dataset}
 Note: Boldface indicates the highest score, while underlining denotes the second-best result among the models.
 
 | Backbone | Method       | **Movies**       |          |          | **Toys**         |          |          | **Sports**       |          |          |
+| ---------------- | ------- | --------- | ---------- | ---------------- | ------- | --------- | ---------- | ---------------- | ------- | 
 |          |              | N@10             | M@20     | M@20     | N@10             | M@20     | M@20     | N@10             | M@20     | M@20     |
 |   SASRec | Base         | 0.0358           | 0.0210   | 0.0429   | 0.0263           | 0.0255   | 0.0191   | 0.0221           | 0.0210   | 0.0073   |
 |          | MobiRec      | 0.0154           | 0.0105   | 0.0305   | 0.0119           | 0.0114   | 0.0099   | 0.0116           | 0.0072   | 0.0098   |
@@ -149,6 +150,7 @@ Note: Boldface indicates the highest score, while underlining denotes the second
 ### Performance Comparison Across Different Methods (Long-Tail Settings)
 
 | Dataset | Model       | **Overall**       |          | **Tail Item**     |          | **Head Item**     |          | **Tail User**     |          | **Head User**     |          |
+| ---------------- | ------- | --------- | ---------- | ---------------- | ------- | --------- | ---------- | ---------------- | ------- |---------------- | ------- |  
 |         |             | R@10              | N@10     | R@10              | N@10     | R@10              | N@10     | R@10              | N@10     | R@10              | N@10     |
 | **Yelp**| SASRec      | 0.5940            | 0.3597   | 0.1142            | 0.0495   | 0.7353            | 0.4511   | 0.5893            | 0.3578   | 0.6122            | 0.3672   |
 |         | LLM-ESR     | 0.6673            | 0.4208   | 0.1893            | 0.0845   | 0.8048            | 0.5199   | 0.6685            | 0.4239   | 0.6625            | 0.4128   |
